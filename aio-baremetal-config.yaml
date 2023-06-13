@@ -1,0 +1,58 @@
+---
+- hosts:
+  - localhost
+  tasks:
+    - dnf:
+        name: python3-tripleoclient
+        state: present
+    - service:
+        name: openvswitch
+        state: started
+        enabled: true
+#   - import_tasks: /usr/share/ansible/tripleo-playbooks/cli-overcloud-node-kernelargs.yaml
+    - name: Kernel args
+      become: true
+      block:
+        - name: Configure tuned before reboot
+          include_role:
+            name: tuned
+          vars:
+            tuned_profile: 'cpu-partitioning-powersave'
+            tuned_isolated_cores: '4-17,22-35'
+        - name: Configure kernel args and reboot
+          include_role:
+            name: tripleo_kernel
+            tasks_from: kernelargs.yml
+          vars:
+            tripleo_kernel_args: 'default_hugepagesz=1GB hugepagesz=1G hugepages=48 intel_iommu=on iommu=pt isolcpus=4-17,22-35'
+            tripleo_kernel_reboot_timeout: '1800'
+            tripleo_kernel_defer_reboot: true
+    # - playbook: /usr/share/ansible/tripleo-playbooks/cli-overcloud-openvswitch-dpdk.yaml
+    - name: Network config
+      become: true
+      block:
+      - name: Configure ovs-dpdk role params
+        include_role:
+           name: tripleo_ovs_dpdk
+        vars:
+          tripleo_ovs_dpdk_lcore_list: ""
+          tripleo_ovs_dpdk_pmd_core_list: "4,5,22,23"
+          tripleo_ovs_dpdk_memory_channels: "4"
+          tripleo_ovs_dpdk_socket_memory: "4096"
+          tripleo_ovs_dpdk_enable_tso: true
+          tripleo_ovs_dpdk_revalidator_cores: ""
+          tripleo_ovs_dpdk_handler_cores: ""
+          tripleo_ovs_dpdk_pmd_auto_lb: true
+          tripleo_ovs_dpdk_pmd_load_threshold: ""
+          tripleo_ovs_dpdk_pmd_improvement_threshold: ""
+          tripleo_ovs_dpdk_pmd_rebal_interval: ""
+          tripleo_ovs_dpdk_vhost_postcopy_support: true
+          tripleo_ovs_dpdk_pmd_maxsleep: 50
+      - import_role:
+          name: tripleo_network_config
+        vars:
+          tenant_vlan_id: 33
+          tripleo_network_config_hide_sensitive_logs: false
+          tripleo_network_config_with_ansible: true
+          tripleo_network_config_template: "{{ playbook_dir }}/aio-nic-config.j2"
+

@@ -1,0 +1,75 @@
+---
+# vim: syntax=yaml
+# vim: set expandtab:
+network_config:
+- type: interface
+  name: eno1
+  use_dhcp: false
+  addresses:
+  - ip_netmask: {{ ctlplane_ip }}/24
+  - ip_netmask: {{ control_virtual_ip }}/32
+  routes:
+    - { destination: "192.168.0.0/16", nexthop: "192.168.2.254" }
+    - { default: true, nexthop: "192.168.2.254"}
+
+- type: interface
+  name: eno2
+  use_dhcp: false
+  defroute: false
+
+- type: interface
+  name: eno3
+  use_dhcp: false
+  defroute: false
+
+- type: interface
+  name: eno4
+  use_dhcp: false
+  defroute: false
+
+- type: sriov_pf
+  name: ens2f0  # i40e
+  mtu: 9000
+  numvfs: 4
+  use_dhcp: false
+  defroute: false
+  nm_controlled: true
+  hotplug: true
+  promisc: false
+
+- type: sriov_pf
+  name: ens2f1  # i40e
+  mtu: 9000
+  numvfs: 4
+  use_dhcp: false
+  defroute: false
+  nm_controlled: true
+  hotplug: true
+  promisc: false
+
+- type: ovs_user_bridge
+  name: br-link0
+  use_dhcp: false
+  defroute: false
+  mtu: 9000
+  ovs_extra: set port br-link0 other_config:lb-output-action=true
+#  addresses:
+  members:
+    - type: ovs_dpdk_bond
+      name: dpdkbond0
+      mtu: 9000
+      rx_queue: 2
+      ovs_extra:
+#        - set port dpdkbond0 lacp=active bond_mode=balance-tcp other_config:bond-detect-mode=miimon other_config:bond-miimon-interval=100 other_config:lacp-time=1
+        - set port dpdkbond0 lacp=off bond_mode=balance-slb other_config:bond-detect-mode=miimon other_config:bond-miimon-interval=100
+      members:
+      - type: ovs_dpdk_port
+        name: dpdk-ens1f0
+        members:
+          - type: interface
+            name: ens1f0
+      - type: ovs_dpdk_port
+        name: dpdk-ens1f1
+        members:
+          - type: interface
+            name: ens1f1

@@ -1,0 +1,81 @@
+---
+parameter_defaults:
+  CloudName: compute04.osp.foobar.space
+  ContainerCli: podman
+  Debug: true
+  CloudDomain: osp.foobar.space
+  ControlPlaneStaticRoutes:
+  - ip_netmask: 0.0.0.0/0
+    next_hop: 192.168.2.2
+    default: true
+  - ip_netmask: 192.168.0.0/16
+    next_hop: 192.168.2.2
+    default: true
+
+  ControlPlaneVipData:
+    fixed_ips:
+    - ip_address: 192.168.2.190
+    name: control_virtual_ip
+    network:
+      tags: []
+    subnets:
+    - ip_version: 4
+  VipPortMap: {}
+
+  DeploymentUser: christophefontaine
+  KernelIpNonLocalBind: 1
+  KernelIpv6ConfAllForwarding: 1
+
+  DockerInsecureRegistryAddress:
+    - 192.168.2.190:8787
+    - compute04.ctlplane.osp.foobar.space:8787
+    - compute04.ctlplane.mgmt.foobar.space:8787
+  ContainerInsecureRegistryAddress:
+    - 192.168.2.190:8787
+    - compute04.ctlplane.osp.foobar.space:8787
+    - compute04.ctlplane.mgmt.foobar.space:8787
+  NtpServer:
+    - time.foobar.space
+  NeutronPublicInterface: eno1
+  NeutronDnsDomain: osp.foobar.space
+  NeutronBridgeMappings: homelab:br-link0
+  NeutronPhysicalBridge: br-link0
+  OVNCMSOptions: "enable-chassis-as-gw"
+  SELinuxMode: permissive
+  StandaloneEnableRoutedNetworks: false
+  StandaloneHomeDir: /home/christophefontaine
+  StandaloneLocalMtu: 1500
+  KernelArgsDeferReboot: true
+
+
+  # Configure Nova to use preallocated raw disks for consistent storage
+  # performance.
+  NovaComputeUseCowImages: false
+  NovaComputeLibvirtPreAllocateImages: space
+
+  NeutronNetworkType: 'vlan,geneve,flat'
+  NeutronNetworkVLANRanges:
+    - homelab:200:240
+    - homelab2:200:240
+  NeutronTunnelTypes: 'geneve'
+  NeutronPluginExtensions: "uplink_status_propagation,qos,port_security,port_hints"
+
+  StandaloneNetworkConfigTemplate: /home/christophefontaine/osp17.0-aio-compute04/aio-nic-config.j2
+  StandaloneParameters:
+    NovaComputeCpuSharedSet: 0-3,18-21
+    NovaComputeCpuDedicatedSet: 6-17,24-35
+    NovaReservedHostMemory: 8192
+    OvsDpdkSocketMemory: '4096'
+    OvsPmdCoreList: "4,5,22,23"
+    OvsDpdkMemoryChannels: 4
+
+    NeutronPhysicalDevMappings: "homelab:ens2f0,homelab2:ens2f1"
+
+    NovaPCIPassthrough:
+    - devname: "ens2f0"
+      trusted: "true"
+      physical_network: "homelab"
+    - devname: "ens2f1"
+      trusted: "true"
+      physical_network: "homelab2"
+    NeutronSriovAgentExtensions: "qos"
