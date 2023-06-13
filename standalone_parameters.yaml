@@ -1,20 +1,20 @@
 ---
 parameter_defaults:
-  CloudName: compute04.osp.foobar.space
+  CloudName: rhos-nfv-03.lab.eng.rdu2.redhat.com
   ContainerCli: podman
   Debug: true
-  CloudDomain: osp.foobar.space
+  CloudDomain: lab.eng.rdu2.redhat.com
   ControlPlaneStaticRoutes:
   - ip_netmask: 0.0.0.0/0
-    next_hop: 192.168.2.2
+    next_hop: 10.8.31.254
     default: true
-  - ip_netmask: 192.168.0.0/16
-    next_hop: 192.168.2.2
+  - ip_netmask: 10.8.0.0/19
+    next_hop: 10.8.31.254
     default: true
 
   ControlPlaneVipData:
     fixed_ips:
-    - ip_address: 192.168.2.190
+    - ip_address: 10.8.2.154
     name: control_virtual_ip
     network:
       tags: []
@@ -22,28 +22,20 @@ parameter_defaults:
     - ip_version: 4
   VipPortMap: {}
 
-  DeploymentUser: christophefontaine
+  DeploymentUser: stack
   KernelIpNonLocalBind: 1
   KernelIpv6ConfAllForwarding: 1
 
-  DockerInsecureRegistryAddress:
-    - 192.168.2.190:8787
-    - compute04.ctlplane.osp.foobar.space:8787
-    - compute04.ctlplane.mgmt.foobar.space:8787
-  ContainerInsecureRegistryAddress:
-    - 192.168.2.190:8787
-    - compute04.ctlplane.osp.foobar.space:8787
-    - compute04.ctlplane.mgmt.foobar.space:8787
   NtpServer:
-    - time.foobar.space
-  NeutronPublicInterface: eno1
-  NeutronDnsDomain: osp.foobar.space
-  NeutronBridgeMappings: homelab:br-link0
+    - clock.redhat.com
+  NeutronPublicInterface: eno3
+  NeutronDnsDomain: lab.eng.rdu2.redhat.com
+  NeutronBridgeMappings: datacentre:br-link0
   NeutronPhysicalBridge: br-link0
   OVNCMSOptions: "enable-chassis-as-gw"
   SELinuxMode: permissive
   StandaloneEnableRoutedNetworks: false
-  StandaloneHomeDir: /home/christophefontaine
+  StandaloneHomeDir: /home/stack
   StandaloneLocalMtu: 1500
   KernelArgsDeferReboot: true
 
@@ -55,27 +47,20 @@ parameter_defaults:
 
   NeutronNetworkType: 'vlan,geneve,flat'
   NeutronNetworkVLANRanges:
-    - homelab:200:240
-    - homelab2:200:240
+    - datacentre:105:110
+    - datacentre2:105:110
   NeutronTunnelTypes: 'geneve'
   NeutronPluginExtensions: "uplink_status_propagation,qos,port_security,port_hints"
-
-  StandaloneNetworkConfigTemplate: /home/christophefontaine/osp17.0-aio-compute04/aio-nic-config.j2
+  DerivePciWhitelistEnabled: false
+  StandaloneNetworkConfigTemplate: /home/stack/osp17.0-aio-compute04/aio-nic-config.j2
   StandaloneParameters:
-    NovaComputeCpuSharedSet: 0-3,18-21
-    NovaComputeCpuDedicatedSet: 6-17,24-35
+    NovaComputeCpuSharedSet: 0-3,24-27
+    NovaComputeCpuDedicatedSet: 8-23,32-47
     NovaReservedHostMemory: 8192
     OvsDpdkSocketMemory: '4096'
-    OvsPmdCoreList: "4,5,22,23"
+    OvsPmdCoreList: "4-7,28-31"
     OvsDpdkMemoryChannels: 4
 
-    NeutronPhysicalDevMappings: "homelab:ens2f0,homelab2:ens2f1"
+    NeutronPhysicalDevMappings: "datacentre:eno1,datacentre2:eno2"
 
-    NovaPCIPassthrough:
-    - devname: "ens2f0"
-      trusted: "true"
-      physical_network: "homelab"
-    - devname: "ens2f1"
-      trusted: "true"
-      physical_network: "homelab2"
-    NeutronSriovAgentExtensions: "qos"
+

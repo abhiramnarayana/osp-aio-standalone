@@ -18,13 +18,13 @@
             name: tuned
           vars:
             tuned_profile: 'cpu-partitioning-powersave'
-            tuned_isolated_cores: '4-17,22-35'
+            tuned_isolated_cores: '4-23,28-47'
         - name: Configure kernel args and reboot
           include_role:
             name: tripleo_kernel
             tasks_from: kernelargs.yml
           vars:
-            tripleo_kernel_args: 'default_hugepagesz=1GB hugepagesz=1G hugepages=48 intel_iommu=on iommu=pt isolcpus=4-17,22-35'
+            tripleo_kernel_args: 'default_hugepagesz=1GB hugepagesz=1G hugepages=48 intel_iommu=on iommu=pt isolcpus=4-23,28-47'
             tripleo_kernel_reboot_timeout: '1800'
             tripleo_kernel_defer_reboot: true
     # - playbook: /usr/share/ansible/tripleo-playbooks/cli-overcloud-openvswitch-dpdk.yaml
@@ -36,7 +36,7 @@
            name: tripleo_ovs_dpdk
         vars:
           tripleo_ovs_dpdk_lcore_list: ""
-          tripleo_ovs_dpdk_pmd_core_list: "4,5,22,23"
+          tripleo_ovs_dpdk_pmd_core_list: "4-7,28-31"
           tripleo_ovs_dpdk_memory_channels: "4"
           tripleo_ovs_dpdk_socket_memory: "4096"
           tripleo_ovs_dpdk_enable_tso: true
@@ -51,7 +51,7 @@
       - import_role:
           name: tripleo_network_config
         vars:
-          tenant_vlan_id: 33
+          tenant_vlan_id: 101
           tripleo_network_config_hide_sensitive_logs: false
           tripleo_network_config_with_ansible: true
           tripleo_network_config_template: "{{ playbook_dir }}/aio-nic-config.j2"

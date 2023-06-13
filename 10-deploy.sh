@@ -5,10 +5,10 @@ sudo rm -f /run/.containerenv
 
 sudo -E openstack tripleo deploy \
   --templates \
-  --local-ip=192.168.2.190/24 \
-  --control-virtual-ip 192.168.2.250 \
-  --deployment-user christophefontaine \
-  --local-domain mgmt.foobar.space \
+  --local-ip=10.8.2.154/19 \
+  --control-virtual-ip 172.16.0.250 \
+  --deployment-user stack \
+  --local-domain lab.eng.rdu2.redhat.com \
   -r $(pwd)/StandaloneDpdkSriov.yaml \
   -n /usr/share/openstack-tripleo-heat-templates/network_data_undercloud.yaml \
   -e /usr/share/openstack-tripleo-heat-templates/environments/standalone/standalone-tripleo.yaml \
@@ -19,8 +19,7 @@ sudo -E openstack tripleo deploy \
   -e $(pwd)/local_registry_images.yaml \
   -e $(pwd)/containers-prepare-parameters.yaml \
   -e $(pwd)/standalone_parameters.yaml \
-  -e $(pwd)/rhsm-private.yaml \
-  --output-dir /home/christophefontaine \
+  --output-dir /home/stack \
   $@
 
 # Subscription manager doesn't work because of
